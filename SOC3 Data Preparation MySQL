@@ -1,0 +1,662 @@
+##### DATA PREPARATION #####
+drop table soc3fact;
+drop table soc3industrydim;
+drop table soc3regionaldim;
+drop table labour_soc3;
+drop table soc3load;
+-- Data import wizard not bringing across correct amount of rows so manually importing file 
+-- Appears to be dropping all rows with 'unknown' values - will need to check why this is happening 
+set global local_infile=on;
+
+CREATE TABLE labour_soc3 (
+	Region varchar(250),
+	ITL2 varchar(250),
+	`Local Authority District` varchar(250),
+	`SOC 3 digit code` varchar(250),
+	`SOC 3 digit label` varchar(250),
+	`Local Authority Code` varchar(250),
+	`Jan-23` varchar(250),
+	`Feb-23` varchar(250),
+	`Mar-23` varchar(250),
+    `Apr-23` varchar(250),
+	`May-23` varchar(250),
+    `Jun-23` varchar(250),	
+    `Jul-23` varchar(250),
+    `Aug-23` varchar(250),
+    `Sep-23` varchar(250),
+    `Oct-23` varchar(250),	
+    `Nov-23` varchar(250),	
+    `Dec-23` varchar(250),	
+    `Jan-24` varchar(250),	
+    `Feb-24` varchar(250),	
+    `Mar-24` varchar(250),	
+    `Apr-24` varchar(250),	
+    `May-24` varchar(250),	
+    `Jun-24` varchar(250),	
+    `Jul-24` varchar(250),	
+    `Aug-24` varchar(250),	
+    `Sep-24` varchar(250),	
+    `Oct-24` varchar(250),	
+    `Nov-24` varchar(250),	
+    `Dec-24` varchar(250),	
+    `Jan-25` varchar(250),	
+    `Feb-25` varchar(250),	
+    `Mar-25` varchar(250),	
+    `Apr-25` varchar(250),	
+    `May-25` varchar(250),	
+    `Jun-25` varchar(250),	
+    `Jul-25` varchar(250),	
+    `Aug-25` varchar(250)
+);
+
+
+load data local infile 'C:/Users/CalumBrown/OneDrive - Blend 360/Documents/Personal Development/UK Labour Market/SOC3.csv' into table labour_soc3
+fields terminated by ','
+enclosed by '"'
+lines terminated by '\r\n'
+ignore 1 lines;
+
+
+-- Data is currently in wide format with every month having its own column and respective values
+-- Going to reshape this to long format for analysis further down the line
+-- Going to use union all combining different select statements into a new table 
+
+
+create table soc3load as
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Jan-23' AS MonthYear, `Jan-23` AS Value
+from labour_soc3
+union all
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Feb-23' AS MonthYear, `Feb-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Mar-23' AS MonthYear, `Mar-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Apr-23' AS MonthYear, `Apr-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'May-23' AS MonthYear, `May-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Jun-23' AS MonthYear, `Jun-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Jul-23' AS MonthYear, `Jul-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Aug-23' AS MonthYear, `Aug-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Sep-23' AS MonthYear, `Sep-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Oct-23' AS MonthYear, `Oct-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Nov-23' AS MonthYear, `Nov-23` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Dec-23' AS MonthYear, `Dec-23` AS Value
+from labour_soc3
+union all
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Jan-24' AS MonthYear, `Jan-24` AS Value
+from labour_soc3
+union all
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Feb-24' AS MonthYear, `Feb-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Mar-24' AS MonthYear, `Mar-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Apr-24' AS MonthYear, `Apr-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'May-24' AS MonthYear, `May-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Jun-24' AS MonthYear, `Jun-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Jul-24' AS MonthYear, `Jul-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Aug-24' AS MonthYear, `Aug-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Sep-24' AS MonthYear, `Sep-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Oct-24' AS MonthYear, `Oct-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Nov-24' AS MonthYear, `Nov-24` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Dec-24' AS MonthYear, `Dec-24` AS Value
+from labour_soc3
+union all
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Jan-25' AS MonthYear, `Jan-25` AS Value
+from labour_soc3
+union all
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Feb-25' AS MonthYear, `Feb-25` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Mar-25' AS MonthYear, `Mar-25` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Apr-25' AS MonthYear, `Apr-25` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'May-25' AS MonthYear, `May-25` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Jun-25' AS MonthYear, `Jun-25` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Jul-25' AS MonthYear, `Jul-25` AS Value
+from labour_soc3
+union all 
+select Region, ITL2, `Local Authority District`, `SOC 3 digit code`, `SOC 3 digit label`, `Local Authority Code`, 
+       'Aug-25' AS MonthYear, `Aug-25` AS Value
+from labour_soc3
+;
+
+-- Now have long table ready for analysis 
+
+#######################################################################################################################################################################################################
+
+### DATA PREPARATION 
+
+-- Need to decide granularity of area - do we need local authority district if UK wide recruitment agency? 
+
+select distinct Region
+from soc3load
+order by Region;
+
+select distinct ITL2
+from soc3load
+order by ITL2;
+
+select distinct `Local Authority District`
+from soc3load
+order by `Local Authority District`;
+
+-- 37 local districts 'ITL2' is more than enough detail for the analysis that we want to perform
+-- Going to collapse rows so that left with 1 row for each industry for each month for each city 
+-- In order to do this will have to make clean the value column as currently has 'x's' in it so sum function wont work
+
+-- We have 26 thousand rows with '[x]' in them 
+
+select distinct `value`
+from soc3load
+where `Value` like ('%x%');
+
+select * 
+from soc3load
+where `Value` = '[x]';
+
+-- Going to give average to these x's based on local authority district soc 3 digit label meaning its the average for that place and industry - most accurate we can get with data
+-- Need to make all '[x]' = nulls then make it an integer data type so perform average aggregation
+
+update soc3load 
+set `Value` = null
+where `Value` = '[x]';
+
+alter table soc3load 
+modify column `Value` int;
+
+-- Updating all nulls to equal their industry and local authority average 
+-- Most granular and accurate i can get
+UPDATE soc3load t
+JOIN (
+    SELECT 
+        `Local Authority District`,
+        `SOC 3 digit label`,
+        AVG(`Value`) AS avg_value
+    FROM soc3load
+    WHERE `Value` IS NOT NULL
+    GROUP BY `Local Authority District`, `SOC 3 digit label`
+) AS sub                                                     -- subquery to create a temporary table you join reshaped_labour to
+ON t.`Local Authority District` = sub.`Local Authority District` 
+   AND t.`SOC 3 digit label` = sub.`SOC 3 digit label`
+SET t.`Value` = sub.avg_value
+WHERE t.`Value` IS NULL;                                     -- Only changing the null values 
+
+-- Checking update has worked okay 
+select min(`Value`), max(`Value`), avg(`Value`)
+from soc3fact;
+
+-- Changing unknwon jobs to Unclassified 
+alter table soc3load 
+rename to soc3fact;
+
+update soc3fact 
+set `SOC 3 digit label` = 'Unclassified' 
+where `SOC 3 digit label` = 'Unknown';
+
+
+#####################################################################################################################################################################################################
+
+#### Data Modelling ####
+
+-- Data model with have 3 dimension tables - Regional dimension, Industry dimension, Date dimension 
+
+
+-- Creating regional dimension table 
+create table soc3regionaldim (
+regionkey int auto_increment primary key,
+ITL2 varchar(100) default null,
+Region varchar(50) default null,
+`Local Authority District` varchar(100),
+Country varchar(25) default null
+);
+
+insert into soc3regionaldim (ITL2, Region, `Local Authority District`)
+select distinct ITL2, Region, `Local Authority District`
+from soc3fact;
+
+select distinct region from soc3fact;
+update soc3regionaldim 
+set Country = case (Region) 
+	when 'Northern Ireland' then 'Northern Ireland'
+    when 'Wales' then 'Wales'
+    when 'Scotland' then 'Scotland'
+    else 'England'
+    end
+    ;
+
+-- Creating date dimension table which will be shared across soc3 and soc4 fact tables
+
+-- Changing format in fact table before bringing over 
+
+update soc3fact
+set MonthYear = replace(MonthYear, 'Jan-', '01');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Feb-', '02');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Mar-', '03');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Apr-', '04');
+update soc3fact
+set MonthYear = replace(MonthYear, 'May-', '05');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Jun-', '06');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Jul-', '07');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Aug-', '08');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Sep-', '09');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Oct-', '10');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Nov-', '11');
+update soc3fact
+set MonthYear = replace(MonthYear, 'Dec-', '12');
+
+update soc3fact 
+set MonthYear = concat(
+	'20',
+    right(MonthYear, 2),
+    left(MonthYear, 2)
+    );
+
+-- Creating dimension table
+create table datedim (
+MonthYear varchar(50) primary key,
+`Month` varchar(20) default null,
+`Year` int default null,
+`Quarter` int default null
+)
+;
+
+insert into datedim (MonthYear)
+select distinct MonthYear 
+from soc3fact;
+
+ update datedim
+ set `Month` = case right(MonthYear, 2)
+	when '01' then 'January'
+	when '02' then 'February'
+	when '03' then 'March'
+	when '04' then 'April'
+	when '05' then 'May'
+	when '06' then 'June'
+	when '07' then 'July'
+	when '08' then 'August'
+	when '09' then 'September'
+	when '10' then 'October'
+	when '11' then 'November'
+	when '12' then 'December'
+    end
+    ;
+    
+update datedim 
+set `Year` = left(MonthYear, 4);
+
+update datedim 
+set `Quarter` = case 
+when right(MonthYear, 2) in ('01', '02', '03') then 1
+when right(MonthYear, 2) in ('04', '05', '06') then 2
+when right(MonthYear, 2) in ('07', '08', '09') then 3
+when right(MonthYear, 2) in ('10', '11', '12') then 4
+end
+;
+
+-- Make both primary and foreign key integers for more efficient joining 
+
+alter table soc3fact
+modify column MonthYear int;
+
+alter table datedim
+modify column MonthYear int;
+
+-- Inserting future dates for when tables are updated
+
+insert into datedim (MonthYear)
+VALUES
+(202509),(202510),(202511),(202512),
+(202601),(202602),(202603),(202604),(202605),(202606),(202607),(202608),(202609),(202610),(202611),(202612),
+(202701),(202702),(202703),(202704),(202705),(202706),(202707),(202708),(202709),(202710),(202711),(202712);
+
+-- Creating industry dimension table - still to doecide what to do here
+select distinct `SOC 3 digit label` 
+from soc3fact
+order by `SOC 3 digit label`;
+
+create table soc3industrydim (
+soc3_id int auto_increment primary key,
+`SOC 3 digit label` varchar(250) default null,
+Sector varchar(100) default null
+)
+;
+
+insert into soc3industrydim (`SOC 3 digit label`)
+select distinct `SOC 3 digit label`
+from soc3fact;
+
+-- Case statement to map each occupation to a larger sector 
+
+update soc3industrydim 
+set Sector = CASE 
+    -- Executive, Senior and General Management
+    WHEN `SOC 3 Digit Label` IN (
+      'Chief Executives and Senior Officials',
+      'Functional Managers and Directors',
+      'Production Managers and Directors',
+      'Managers and Proprietors in Other Services'
+    ) THEN 'Executive, Senior and General Management'
+
+    -- Trades, Manufacturing and Process Work
+    WHEN `SOC 3 Digit Label` IN (
+      'Building Finishing Trades',
+      'Construction and Building Trades',
+      'Construction Operatives',
+      'Construction and Building Trades Supervisors',
+      'Metal Forming, Welding and Related Trades',
+      'Metal Machining, Fitting and Instrument Making Trades',
+      'Metal Working Machine Operatives',
+      'Plant and Machine Operatives',
+      'Printing Trades',
+      'Process Operatives',
+      'Assemblers and Routine Operatives',
+      'Production, Factory and Assembly Supervisors ',
+      'Vehicle Trades',
+      'Elementary Construction Occupations',
+      'Elementary Process Plant Occupations',
+      'Textiles and Garments Trades',
+      'Other Skilled Trades'
+    ) THEN 'Trades, Manufacturing and Process Work'
+
+    -- Engineering and Technical Professions
+    WHEN `SOC 3 Digit Label` IN (
+      'Architects, Chartered Architectural Technologists, Planning Officers, Surveyors and Construction Professionals',
+      'CAD, Drawing and Architectural Technicians',
+      'Engineering Professionals',
+      'Science, Engineering and Production Technicians',
+      'Quality and Regulatory Professionals',
+      'Regulatory Associate Professionals',
+      'Electrical and Electronic Trades',
+      'Skilled Metal, Electrical and Electronic Trades Supervisors'
+    ) THEN 'Engineering and Technical Professions'
+
+    -- Finance, Accounting, Business and Administration
+    WHEN `SOC 3 Digit Label` IN (
+      'Administrative Occupations: Finance',
+      'Administrative Occupations: Government and Related Organisations',
+      'Administrative Occupations: Office Managers and Supervisors',
+      'Administrative Occupations: Records',
+      'Elementary Administration Occupations',
+      'Business and Financial Project Management Professionals',
+      'Business Associate Professionals',
+      'Business, Research and Administrative Professionals',
+      'Finance Associate Professionals',
+      'Finance Professionals',
+      'HR, Training and Other Vocational Associate Guidance Professionals',
+      'Other Administrative Occupations',
+      'Secretarial and Related Occupations'
+    ) THEN 'Finance, Accounting, Business and Administration'
+
+    -- Legal and Protective Services
+    WHEN `SOC 3 Digit Label` IN (
+      'Legal Professionals',
+      'Legal Associate Professionals',
+      'Protective Service Occupations',
+      'Senior Officers in Protective Services',
+      'Community and Civil Enforcement Occupations',
+      'Public Services Associate Professionals',
+      'Elementary Security Occupations'
+    ) THEN 'Legal and Protective Services'
+
+    -- Health and Social Care
+    WHEN `SOC 3 Digit Label` IN (
+      'Health and Social Services Managers and Directors',
+      'Health Associate Professionals',
+      'Medical Practitioners',
+      'Nursing Professionals',
+      'Therapy Professionals',
+      'Welfare Professionals',
+      'Welfare and Housing Associate Professionals',
+      'Other Health Professionals',
+      'Caring Personal Services',
+      'Veterinarians',
+      'Veterinary nurses',
+      'Managers and Proprietors in Health and Care Services'
+    ) THEN 'Health and Social Care'
+
+    -- IT and Digital Professions
+    WHEN `SOC 3 Digit Label` IN (
+      'Information Technology Professionals',
+      'Information Technology Technicians',
+      'Web and Multimedia Design Professionals'
+    ) THEN 'IT and Digital Professions'
+
+    -- Transport and Logistics
+    WHEN `SOC 3 Digit Label` IN (
+      'Managers in Logistics, Warehousing and Transport',
+      'Directors in Logistics, Warehousing and Transport',
+      'Other Drivers and Transport Operatives',
+      'Mobile Machine Drivers and Operatives',
+      'Road Transport Drivers',
+      'Transport Associate Professionals',
+      'Elementary Storage Occupations'
+    ) THEN 'Transport and Logistics'
+
+    -- Retail and Customer Service
+    WHEN `SOC 3 Digit Label` IN (
+      'Customer Service Occupations',
+      'Customer Service Supervisors',
+      'Sales Assistants and Retail Cashiers',
+      'Sales Related Occupations',
+      'Sales, Marketing and Related Associate Professionals',
+      'Managers and Directors in Retail and Wholesale',
+      'Shopkeepers and Sales Supervisors',
+      'Elementary Sales Occupations'
+    ) THEN 'Retail and Customer Service'
+
+    -- Agriculture, Forestry, Fishing and Horticulture
+    WHEN `SOC 3 Digit Label` IN (
+      'Agricultural and Related Trades',
+      'Elementary Agricultural Occupations',
+      'Managers and Proprietors in Agriculture Related Services',
+      'Animal Care and Control Services'
+    ) THEN 'Agriculture, Forestry, Fishing and Horticulture'
+
+    -- Hospitality, Leisure and Tourism
+    WHEN `SOC 3 Digit Label` IN (
+      'Bed and Breakfast and Guest House Owners and Proprietors ',
+      'Food Preparation and Hospitality Trades',
+      'Managers and Proprietors in Hospitality and Leisure Services',
+      'Leisure and Travel Services',
+      'Sports and Fitness Occupations',
+      'Housekeeping and Related Services',
+      'Cleaning and Housekeeping Managers and Supervisors',
+      'Hairdressers and Related Services',
+      'Elementary Cleaning Occupations'
+    ) THEN 'Hospitality, Leisure and Tourism'
+
+    -- Education
+    WHEN `SOC 3 Digit Label` IN (
+      'Teaching Professionals',
+      'Teaching and Childcare Associate Professionals',
+      'Teaching and Childcare Support Occupations',
+      'Other Educational Professionals',
+      'Librarians and Related Professionals'
+    ) THEN 'Education'
+
+    -- Utilities, Waste and Environmental Services
+    WHEN `SOC 3 Digit Label` IN (
+      'Conservation and Environment Professionals'
+    ) THEN 'Utilities, Waste and Environmental Services'
+
+    -- Creative and Arts
+    WHEN `SOC 3 Digit Label` IN (
+      'Artistic, Literary and Media Occupations',
+      'Design Occupations ',
+      'Media Professionals'
+    ) THEN 'Creative and Arts'
+
+    -- Science and Research
+    WHEN `SOC 3 Digit Label` IN (
+      'Natural and Social Science Professionals',
+      'Research and Development (R&D) and Other Research Professionals'
+    ) THEN 'Science and Research'
+
+    -- Food and Beverage Production
+    WHEN `SOC 3 Digit Label` IN (
+      'Food Preparation and Hospitality Trades'
+    ) THEN 'Food and Beverage Production'
+
+    -- Miscellaneous Sectors
+    WHEN `SOC 3 Digit Label` IN (
+      'Other Elementary Services Occupations',
+      'Unclassified'
+    ) THEN 'Miscellaneous Sectors'
+
+    ELSE 'Miscellaneous Sectors'
+END;
+
+
+-- Joining dimension to fact table
+
+-- Creating index on join columns
+-- Having to change column types in fact table for this to varchar as currently medium text
+
+alter table soc3fact 
+modify column ITL2 varchar(100),
+modify column `SOC 3 digit label` varchar(250);
+
+create index regiondimindex2 on soc3regionaldim(`Local Authority District`); 
+create index regionfactindex3 on soc3fact(`Local Authority District`); 
+
+create index industryfactindex on soc3fact(`SOC 3 digit label`);
+create index industrydimindex on soc3industrydim(`SOC 3 digit label`);
+
+
+-- Adding key column to fact tables
+
+alter table soc3fact 
+add column regionkey int; 
+
+alter table soc3fact
+add column soc3_id int;
+
+-- Joining tables 
+
+update soc3fact as f 
+join soc3regionaldim as d
+on f.`Local Authority District` = d.`Local Authority District`
+set f.regionkey = d.regionkey;
+
+update soc3fact as f
+join soc3industrydim as d
+on f.`SOC 3 digit label` = d.`SOC 3 digit label`
+set f.soc3_id = d.soc3_id;
+
+-- dropping duplicate columns from fact table 
+
+alter table soc3fact 
+drop column Region,
+drop column ITL2,
+drop column `Local Authority District`;
+
+alter table soc3fact
+drop column `SOC 3 digit code`,
+drop column `SOC 3 digit label`;
+
+-- setting foreign keys in fact table 
+alter table soc3fact 
+add constraint fk_region
+foreign key (regionkey) references soc3regionaldim(regionkey)
+on update cascade
+on delete restrict;
+
+alter table soc3fact 
+add constraint fk_date
+foreign key (MonthYear) references datedim(MonthYear)
+on update cascade
+on delete restrict;
+
+alter table soc3fact 
+add constraint fk_industry
+foreign key (soc3_id) references soc3industrydim(soc3_id)
+on update cascade
+on delete restrict;
+
+-- Star Schema built and ready for further analysis 
+
+###################################################################################################################################################################
+
+select count(*)
+from soc3fact;
