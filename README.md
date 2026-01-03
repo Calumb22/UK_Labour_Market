@@ -7,6 +7,8 @@ https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/employmentandemplo
 
 Data was then prepared and data model built using MySQL.
 
+Data pipeline was built in MySQL to allow seamless update of most up-to-date data into report.
+
 Report was then built using power BI: 
 
 <img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/85bf4449-bc35-4f57-af01-88be3aa6ad15" /> <img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/caa78618-046c-4156-85d1-51dfd336ebf5" />
