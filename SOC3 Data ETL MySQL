@@ -1,0 +1,123 @@
+### SOC3 Data ETL 
+
+-- Run script once csv is updated to update fact table with new monthly data 
+-- Ensure month column is unpivoted in csv prior to loading in
+-- Refer to SOC4 Data import, prep and modelling for commentary points 
+
+set global local_infile=on;
+
+create table staging_table (
+Region varchar(250),
+ITL2 varchar(250),
+`Local Authority District` varchar(250),
+`SOC 3 digit code` varchar(250),
+`SOC 3 digit label` varchar(250),
+`Local Authority Code` varchar (250),
+MonthYear varchar(250),
+`Value` varchar(250)
+);
+
+load data local infile 'C:/Users/CalumBrown/OneDrive - Blend 360/Documents/Personal Development/UK Labour Market/Labour_market_staging.csv' into table staging_table
+fields terminated by ','
+enclosed by '"'
+lines terminated by '\r\n'
+ignore 1 lines;
+
+
+update staging_table 
+set `Value` = null 
+WHERE `Value` NOT REGEXP '^[0-9]+$';        -- set any non number values to null
+
+alter table staging_table
+modify column `Value` int;
+
+UPDATE staging_table t
+JOIN (
+    SELECT 
+        `Local Authority District`,
+        `SOC 3 digit label`,
+        AVG(`Value`) AS avg_value
+    FROM staging_table
+    WHERE `Value` IS NOT NULL
+    GROUP BY `Local Authority District`, `SOC 3 digit label`
+) AS sub                                                     -- subquery to create a temporary table you join reshaped_labour to
+ON t.`Local Authority District` = sub.`Local Authority District` 
+   AND t.`SOC 3 digit label` = sub.`SOC 3 digit label`
+SET t.`Value` = sub.avg_value
+WHERE t.`Value` IS NULL; 
+
+update staging_table 
+set `SOC 3 digit label` = 'Unclassified' 
+where `SOC 3 digit label` = 'Unknown';
+
+update staging_table
+set MonthYear = replace(MonthYear, 'Jan-', '01');
+update staging_table
+set MonthYear = replace(MonthYear, 'Feb-', '02');
+update staging_table
+set MonthYear = replace(MonthYear, 'Mar-', '03');
+update staging_table
+set MonthYear = replace(MonthYear, 'Apr-', '04');
+update staging_table
+set MonthYear = replace(MonthYear, 'May-', '05');
+update staging_table
+set MonthYear = replace(MonthYear, 'Jun-', '06');
+update staging_table
+set MonthYear = replace(MonthYear, 'Jul-', '07');
+update staging_table
+set MonthYear = replace(MonthYear, 'Aug-', '08');
+update staging_table
+set MonthYear = replace(MonthYear, 'Sep-', '09');
+update staging_table
+set MonthYear = replace(MonthYear, 'Oct-', '10');
+update staging_table
+set MonthYear = replace(MonthYear, 'Nov-', '11');
+update staging_table
+set MonthYear = replace(MonthYear, 'Dec-', '12');
+
+update staging_table 
+set MonthYear = concat(
+	'20',
+    right(MonthYear, 2),
+    left(MonthYear, 2)
+    );
+    
+
+alter table staging_table
+modify column MonthYear int;
+
+create index regionstagetableindex on staging_table(`Local Authority District`); 
+create index industrystagingindex on staging_table(`SOC 3 digit label`);
+
+alter table staging_table 
+add column regionkey int,
+add column soc3_id int;
+
+update staging_table as f 
+join soc3regionaldim as d
+on f.`Local Authority District` = d.`Local Authority District`
+set f.regionkey = d.regionkey;
+
+update staging_table as f
+join soc3industrydim as d
+on f.`SOC 3 digit label` = d.`SOC 3 digit label`
+set f.soc3_id = d.soc3_id;
+
+
+alter table staging_table 
+drop column Region,
+drop column ITL2,
+drop column `Local Authority District`,
+drop column `Local Authority Code`;
+
+alter table staging_table
+drop column `SOC 3 digit code`,
+drop column `SOC 3 digit label`;
+
+insert into soc3fact (MonthYear, `Value`, regionkey, soc3_id)
+select MonthYear, `Value`, regionkey, soc3_id
+from staging_table;
+
+drop table staging_table;
+
+-- is there a way to drop historic data to keep table size smaller?
