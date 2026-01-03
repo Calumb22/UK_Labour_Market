@@ -1,0 +1,325 @@
+################ SOC3 Labour Market EDA #############
+
+
+-- Checking jobs in 2025 so far by ITL2 region - London almost 4 x greater than any other dstrict 
+select ITL2 as region, sum(`value`) as new_jobs
+from soc3fact f
+join soc3regionaldim d
+on f.regionkey = d.regionkey
+join datedim e
+on f.MonthYear = e.MonthYear
+where e.`year` >= 2025
+group by d.ITL2
+order by new_jobs desc;
+
+-- Looking to see this as a percentage of total jobs 
+-- London with almost 17% of all jobs 
+with job as
+(
+select ITL2 as district, sum(`value`) as new_jobs
+from soc3fact f
+join soc3regionaldim d
+on f.regionkey = d.regionkey
+join datedim e
+on f.MonthYear = e.MonthYear
+where e.`year` >= 2025
+group by d.ITL2
+) 
+
+select district, new_jobs, concat(round((new_jobs / sum(new_jobs) over ()* 100), 2), "%") as percent_jobs -- window function so calculation runs through every row
+from job
+order by new_jobs desc;
+
+-- Comparison to average - exploring window functions 
+
+with job as
+(
+select ITL2 as district, sum(`value`) as new_jobs
+from soc3fact f
+join soc3regionaldim d
+on f.regionkey = d.regionkey
+join datedim e
+on f.MonthYear = e.MonthYear
+where e.`year` >= 2025
+group by d.ITL2
+),
+combo as
+(
+select district, new_jobs, avg(new_jobs) over () as `Vacancy Average` -- window function so calculation runs through every row
+from job
+)
+
+select district, new_jobs, `Vacancy Average`, (new_jobs - `Vacancy Average`) as `+- average`
+from combo
+order by new_jobs desc;
+
+-- Looking at 2025 month amounts for districts
+-- also looking at most recent month to see trends
+-- good to see hw each district is changing monthly 
+with jobs as
+(
+select ITL2 as district, `Month`, month_num, sum(`value`) as new_jobs
+from soc3fact f
+join soc3regionaldim d
+on f.regionkey = d.regionkey
+join datedim e
+on f.MonthYear = e.MonthYear
+where e.`year` >= 2025
+group by d.ITL2, `Month`, month_num
+),
+jobss as 
+(
+select district, `Month`, month_num, new_jobs, avg(new_jobs) over (partition by district) as monthly_average
+from jobs
+)
+
+select district, `Month`, month_num, new_jobs, monthly_average, (new_jobs - monthly_average) as `+- change`
+from jobss
+order by district, month_num asc;
+ 
+ 
+-- Looking to see how i can order this by month 
+with jobs as
+(
+select ITL2 as district, `Month`, month_num, sum(`value`) as new_jobs
+from soc3fact f
+join soc3regionaldim d
+on f.regionkey = d.regionkey
+join datedim e
+on f.MonthYear = e.MonthYear
+where e.`year` >= 2025
+group by d.ITL2, `Month`, month_num
+),
+jobss as 
+(
+select district, `Month`, month_num, new_jobs, avg(new_jobs) over (partition by district) as monthly_average
+from jobs
+)
+
+select district, `Month`, month_num, new_jobs, monthly_average, (new_jobs - monthly_average) as `+- change`
+from jobss
+where `Month` = 'August';
+
+
+-- Checking month totals to see trend
+-- can see peak this year in May with 82000 new vacancies then quite a dip from then on till current month 
+select `Month`, sum(`Value`) as new_jobs
+from soc3fact f
+join datedim d
+on f.MonthYear = d.MonthYear
+where `Year` >=2025
+group by `Month`, month_num
+order by month_num asc;
+
+-- Calculating percentage change each month 
+
+with cte as
+(
+select `Month`, month_num, sum(`Value`) as new_jobs
+from soc3fact f
+join datedim d
+on f.MonthYear = d.MonthYear
+where `Year` >=2025
+group by `Month`, month_num
+),
+
+cte2 as
+(
+select f.`Month`, f.month_num, f.new_jobs, d.new_jobs as oldjobs, (f.new_jobs - d.new_jobs) as `change`
+from cte f
+left join cte d 
+on f.month_num = d.month_num + 1
+)
+
+select `Month`, month_num, new_jobs, concat(round((`change` / oldjobs * 100), 2), "%") as `percent change`
+from cte2;
+
+
+-- Moving on to looking at sectors and industries
+
+-- creating temporary table with just 2025
+
+create temporary table 2025_only as
+select f.MonthYear as MonthYear, `Value`, regionkey, soc3_id
+from soc3fact f
+join datedim d
+on f.MonthYear = d.MonthYear
+where `Year` >= 2025;
+
+
+-- Can see Finance, accounting, business and admin has the most new job vacancies in 2025. 
+-- Quite closely followed by Health and social care 
+
+select Sector, sum(`Value`) as new_jobs
+from 2025_only f
+join soc3industrydim d
+on f.soc3_id = d.soc3_id
+group by Sector
+order by new_jobs desc;
+
+-- Looking at percentage share per sector
+
+with cte as 
+(select Sector, sum(`Value`) as new_jobs
+from 2025_only f
+join soc3industrydim d
+on f.soc3_id = d.soc3_id
+group by Sector
+)
+
+select Sector, new_jobs, concat(round((new_jobs / sum(new_jobs) over() * 100), 2), "%") as `% Share of New Jobs`
+from cte
+order by new_jobs desc;
+
+-- Checking to see if most recent month trends are similar 
+-- Education with the most significant drop off by over 2% of usual share. 
+-- Possible link to budget spending cuts?
+with cte as 
+(
+select Sector, sum(f.`Value`) as new_jobs
+from soc3fact f
+join soc3industrydim d
+on f.soc3_id = d.soc3_id
+join datedim e
+on f.MonthYear = e.MonthYear
+where `Year` >= 2025
+group by d.Sector
+),
+cte2 as 
+(
+select Sector, sum(f.`Value`) as new_jobs
+from soc3fact f
+join soc3industrydim d
+on f.soc3_id = d.soc3_id
+join datedim e
+on f.MonthYear = e.MonthYear
+where `Month` = 'August'
+group by Sector
+)
+
+select Sector, 'Whole year' as period, new_jobs, concat(round((new_jobs / sum(new_jobs) over() * 100), 2), "%") as `% Share of New Jobs`
+from cte
+UNION ALL
+select Sector, 'August' as period, new_jobs, concat(round((new_jobs / sum(new_jobs) over() * 100), 2), "%") as `% Share of New Jobs`
+from cte2
+order by Sector;
+
+
+-- Looks like can't use a temp table in CTE's in union statements - mysql issue
+
+
+-- Moving on to looking at specific job roles
+
+select `SOC 3 digit label`, sum(`value`) as new_jobs
+from 2025_only f
+join soc3industrydim d
+on f.soc3_id = d.soc3_id
+group by `SOC 3 digit label`
+order by new_jobs desc;
+
+-- Looking at trending job roles 
+-- Try to create comparison between current month and average monthly sum 
+-- b n b guest house owners and directors in logistics, warehousing and transport both gre over 40% in August from their monthly average for 2025
+-- Biggest fall was teaching professionals and elementary sales occupations both by over 40% also 
+
+with cte as
+(
+select `SOC 3 digit label`, sum(`Value`) as sum_month
+from soc3fact f 
+join soc3industrydim d
+on f.soc3_id = d.soc3_id
+join datedim e
+on f.MonthYear = e.MonthYear
+where `Year` >= 2025 and `Month` != 'August'
+group by `SOC 3 digit label`, `Month`
+),
+
+cte4 as
+(
+select `soc 3 digit label`, avg(sum_month) as avg_month
+from cte
+group by `SOC 3 digit label`
+),
+
+cte2 as
+(
+select `SOC 3 digit label`, sum(`Value`) as august_amount
+from soc3fact f 
+join soc3industrydim d
+on f.soc3_id = d.soc3_id
+join datedim e
+on f.MonthYear = e.MonthYear
+where `Year` >= 2025 and e.`Month` = 'August'
+group by `SOC 3 digit label`
+),
+
+cte3 as
+(
+select f.`SOC 3 digit label`, avg_month, august_amount
+from cte4 f
+join cte2 d
+on f.`soc 3 digit label` = d.`soc 3 digit label`
+)
+
+select `SOC 3 digit label`, avg_month, august_amount, 
+round(((august_amount - avg_month) / avg_month * 100),2) as `% change`,
+CASE
+when august_amount > avg_month then 'Trending'
+when august_amount < avg_month then 'falling'
+else 'Steady'
+end as `Market Trend`
+from cte3
+order by `% change` desc;
+
+-- Checking the same but for regions
+-- Scttish regions all increasing which is interesting
+
+with cte as
+(
+select ITL2, sum(`Value`) as sum_month
+from soc3fact f 
+join soc3regionaldim d
+on f.regionkey = d.regionkey
+join datedim e
+on f.MonthYear = e.MonthYear
+where `Year` >= 2025 and `Month` != 'August'
+group by ITL2, `Month`
+),
+
+cte4 as
+(
+select ITL2, avg(sum_month) as avg_month
+from cte
+group by ITL2
+),
+
+cte2 as
+(
+select ITL2, sum(`Value`) as august_amount
+from soc3fact f 
+join soc3regionaldim d
+on f.regionkey = d.regionkey
+join datedim e
+on f.MonthYear = e.MonthYear
+where `Year` >= 2025 and e.`Month` = 'August'
+group by ITL2
+),
+
+cte3 as
+(
+select f.ITL2, avg_month, august_amount
+from cte4 f
+join cte2 d
+on f.ITL2 = d.ITL2
+)
+
+select ITL2, avg_month, august_amount, 
+round(((august_amount - avg_month) / avg_month * 100),2) as `% change`,
+CASE
+when august_amount > avg_month then 'Trending'
+when august_amount < avg_month then 'falling'
+else 'Steady'
+end as `Market Trend`
+from cte3
+order by `% change` desc;
+
