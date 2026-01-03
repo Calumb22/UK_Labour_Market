@@ -1,0 +1,480 @@
+##### DATA PREPARATION #####
+
+
+-- Data import wizard not bringing across correct amount of rows so manually importing file 
+-- Appears to be dropping all rows with 'unknown' values - will need to check why this is happening 
+
+set global local_infile=on;
+
+CREATE TABLE labour_market (
+Region varchar(250),
+`SOC 4 digit code` varchar(250),
+`SOC 4 digit label` varchar(250),
+	`Jan-23` varchar(250),
+	`Feb-23` varchar(250),
+	`Mar-23` varchar(250),
+    `Apr-23` varchar(250),
+	`May-23` varchar(250),
+    `Jun-23` varchar(250),	
+    `Jul-23` varchar(250),
+    `Aug-23` varchar(250),
+    `Sep-23` varchar(250),
+    `Oct-23` varchar(250),	
+    `Nov-23` varchar(250),	
+    `Dec-23` varchar(250),	
+    `Jan-24` varchar(250),	
+    `Feb-24` varchar(250),	
+    `Mar-24` varchar(250),	
+    `Apr-24` varchar(250),	
+    `May-24` varchar(250),	
+    `Jun-24` varchar(250),	
+    `Jul-24` varchar(250),	
+    `Aug-24` varchar(250),	
+    `Sep-24` varchar(250),	
+    `Oct-24` varchar(250),	
+    `Nov-24` varchar(250),	
+    `Dec-24` varchar(250),	
+    `Jan-25` varchar(250),	
+    `Feb-25` varchar(250),	
+    `Mar-25` varchar(250),	
+    `Apr-25` varchar(250),	
+    `May-25` varchar(250),	
+    `Jun-25` varchar(250),	
+    `Jul-25` varchar(250),	
+    `Aug-25` varchar(250)
+);
+
+
+load data local infile 'C:/Users/CalumBrown/OneDrive - Blend 360/Documents/Personal Development/UK Labour Market/SOC4.csv' into table labour_market
+fields terminated by ','
+enclosed by '"'
+lines terminated by '\r\n'
+ignore 1 lines;
+
+
+
+-- Data is currently in wide format with every month having its own column and respective values
+-- Going to reshape this to long format for analysis further down the line
+-- Going to use union all combining different select statements into a new table 
+
+create table reshaped_labour as
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Jan-23' AS MonthYear, `Jan-23` AS Value
+from labour_market
+union all
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Feb-23' AS MonthYear, `Feb-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`,
+       'Mar-23' AS MonthYear, `Mar-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Apr-23' AS MonthYear, `Apr-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'May-23' AS MonthYear, `May-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Jun-23' AS MonthYear, `Jun-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`,
+       'Jul-23' AS MonthYear, `Jul-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Aug-23' AS MonthYear, `Aug-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Sep-23' AS MonthYear, `Sep-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Oct-23' AS MonthYear, `Oct-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Nov-23' AS MonthYear, `Nov-23` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Dec-23' AS MonthYear, `Dec-23` AS Value
+from labour_market
+union all
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Jan-24' AS MonthYear, `Jan-24` AS Value
+from labour_market
+union all
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Feb-24' AS MonthYear, `Feb-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Mar-24' AS MonthYear, `Mar-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Apr-24' AS MonthYear, `Apr-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'May-24' AS MonthYear, `May-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Jun-24' AS MonthYear, `Jun-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Jul-24' AS MonthYear, `Jul-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Aug-24' AS MonthYear, `Aug-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Sep-24' AS MonthYear, `Sep-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`,
+       'Oct-24' AS MonthYear, `Oct-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Nov-24' AS MonthYear, `Nov-24` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Dec-24' AS MonthYear, `Dec-24` AS Value
+from labour_market
+union all
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Jan-25' AS MonthYear, `Jan-25` AS Value
+from labour_market
+union all
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Feb-25' AS MonthYear, `Feb-25` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Mar-25' AS MonthYear, `Mar-25` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Apr-25' AS MonthYear, `Apr-25` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'May-25' AS MonthYear, `May-25` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Jun-25' AS MonthYear, `Jun-25` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Jul-25' AS MonthYear, `Jul-25` AS Value
+from labour_market
+union all 
+select Region, `SOC 4 digit code`, `SOC 4 digit label`, 
+       'Aug-25' AS MonthYear, `Aug-25` AS Value
+from labour_market
+;
+
+-- Now have long table ready for preparation and analysis
+
+#######################################################################################################################################################################################################
+
+### DATA PREPARATION 
+
+select distinct Region
+from reshaped_labour
+order by Region;
+
+-- We have 2548 rows with '[x]' in them in value 
+
+select count(*) 
+from reshaped_labour
+where `Value` = '[x]';
+
+-- Going to give average to these x's based on Region and soc 4 digit label meaning its the average for that place and industry - most accurate we can get with data
+-- Need to make all '[x]' = nulls then make it an integer data type so perform average aggregation
+
+update reshaped_labour 
+set `Value` = null
+where `Value` = '[x]';
+
+alter table reshaped_labour 
+modify column `Value` int;
+
+-- Updating all nulls to equal their industry and regional average 
+UPDATE reshaped_labour t
+JOIN (
+    SELECT 
+        `Region`,
+        `SOC 4 digit label`,
+        AVG(`Value`) AS avg_value
+    FROM reshaped_labour
+    WHERE `Value` IS NOT NULL
+    GROUP BY `Region`, `SOC 4 digit label`
+) AS sub                                                     -- subquery to create a temporary table to join reshaped_labour to
+ON t.`Region` = sub.`Region` 
+   AND t.`SOC 4 digit label` = sub.`SOC 4 digit label`
+SET t.`Value` = sub.avg_value
+WHERE t.`Value` IS NULL;                                     -- Only changing the null values 
+
+-- Checking update has worked okay 
+select min(`Value`), max(`Value`), avg(`Value`)
+from reshaped_labour;
+
+-- We want to remove total UK rows are they are skewing data due to being sums of all other rows 
+
+delete from reshaped_labour 
+where Region = 'Total UK';
+
+
+alter table reshaped_labour
+rename to soc4fact;
+
+-- 384 rows with unknown soc 4 digit label and code - means jobs with no specification. Keep these in or delete? Does contribute to total and can just have category as miscellaneous. Maintains correct total values
+select * 
+from soc4fact
+where `SOC 4 digit label` = 'unknown';
+
+#####################################################################################################################################################################################################
+
+#### Data Modelling ####
+
+-- Data model with have 3 dimension tables 
+-- Regional dimension with country grouping, Industry dimension with industry mapping and date dimension with month and year
+-- Date dimension already created in schema 
+
+
+-- Creating region dimension table 
+create table soc4regionaldim (
+regionkey int auto_increment primary key,
+Region varchar(50) default null,
+Country varchar(25) default null
+);
+
+insert into soc4regionaldim (Region)
+select distinct Region 
+from soc4fact;
+
+select distinct region from soc4fact;
+update soc4regionaldim 
+set Country = case (Region) 
+	when 'Northern Ireland' then 'Northern Ireland'
+    when 'Wales' then 'Wales'
+    when 'Scotland' then 'Scotland'
+    else 'England'
+    end
+    ;
+    
+-- Creating industry dimension table - still to decide what to do here
+create table soc4industrydim (
+soc4_id int auto_increment primary key,
+`SOC 4 digit label` varchar(250) default null,
+Sector varchar(100) default null
+)
+;
+
+insert into soc4industrydim (`SOC 4 digit label`)
+select distinct `SOC 4 digit label`
+from soc4fact;
+
+-- Loading in prebuilt sector mapping csv 
+
+update soc4industrydim as i
+join occupation_sectors as o
+on i.`SOC 4 digit label` = o.`SOC 4 digit label`
+set i.Sector = o.Sector;
+
+update soc4industrydim 
+set Sector = 'Miscellaneous Sectors' 
+where Sector in ('Miscellaneous / Unknown', 'Other / Unknown');
+
+-- Creating date dimension 
+
+-- Changing format in fact table before bringing over 
+
+update soc4fact
+set MonthYear = replace(MonthYear, 'Jan-', '01');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Feb-', '02');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Mar-', '03');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Apr-', '04');
+update soc4fact
+set MonthYear = replace(MonthYear, 'May-', '05');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Jun-', '06');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Jul-', '07');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Aug-', '08');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Sep-', '09');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Oct-', '10');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Nov-', '11');
+update soc4fact
+set MonthYear = replace(MonthYear, 'Dec-', '12');
+
+update soc4fact 
+set MonthYear = concat(
+	'20',
+    right(MonthYear, 2),
+    left(MonthYear, 2)
+    );
+
+-- Creating dimension table
+create table datedim (
+MonthYear varchar(50) primary key,
+`Month` varchar(20) default null,
+`Year` int default null,
+`Quarter` int default null
+)
+;
+
+insert into datedim (MonthYear)
+select distinct MonthYear 
+from soc4fact;
+
+ update datedim
+ set `Month` = case right(MonthYear, 2)
+	when '01' then 'January'
+	when '02' then 'February'
+	when '03' then 'March'
+	when '04' then 'April'
+	when '05' then 'May'
+	when '06' then 'June'
+	when '07' then 'July'
+	when '08' then 'August'
+	when '09' then 'September'
+	when '10' then 'October'
+	when '11' then 'November'
+	when '12' then 'December'
+    end
+    ;
+    
+update datedim 
+set `Year` = left(MonthYear, 4);
+
+update datedim 
+set `Quarter` = case 
+when right(MonthYear, 2) in ('01', '02', '03') then 1
+when right(MonthYear, 2) in ('04', '05', '06') then 2
+when right(MonthYear, 2) in ('07', '08', '09') then 3
+when right(MonthYear, 2) in ('10', '11', '12') then 4
+end
+;
+
+-- Setting month  number and short month for dashboard
+
+alter table datedim 
+add column month_num int,
+add column month_short varchar(10);
+
+update datedim 
+set month_num = case (Month)
+when "January" then 1
+when "February" then 2
+when "March" then 3
+when "April" then 4
+when "May" then 5
+when "June" then 6
+when "July" then 7
+when "August" then 8
+when "September" then 9
+when "October" then 10
+when "November" then 11
+when "December" then 12
+end;
+
+update datedim 
+set month_short = left(Month, 3);
+
+
+alter table soc4fact
+modify column MonthYear int;
+
+alter table datedim
+modify column MonthYear int;
+
+-- Inserting future dates for when tables are updated
+
+insert into datedim (MonthYear)
+VALUES
+(202509),(202510),(202511),(202512),
+(202601),(202602),(202603),(202604),(202605),(202606),(202607),(202608),(202609),(202610),(202611),(202612),
+(202701),(202702),(202703),(202704),(202705),(202706),(202707),(202708),(202709),(202710),(202711),(202712);
+
+-- Joining tables together 
+
+-- Setting indexes for efficient join
+
+create index soc4regionindex on soc4regionaldim(Region);
+create index soc4factregionindex on soc4fact(Region);
+
+create index soc4industryindex on soc4industrydim(`SOC 4 digit label`);
+create index soc4factindustryindex on soc4fact(`SOC 4 digit label`);
+
+
+
+
+-- Adding foreign key columns to fact table 
+
+alter table soc4fact 
+add column regionkey int,
+add column soc4_id int;
+
+update soc4fact as f
+join soc4regionaldim as d
+on f.Region = d.Region
+set f.regionkey = d.regionkey;
+
+update soc4fact as f
+join soc4industrydim as d
+on f.`SOC 4 digit label` = d.`SOC 4 digit label`
+set f.soc4_id = d.soc4_id;
+
+-- Dropping duplicate columns from fact table
+
+alter table soc4fact 
+drop column Region,
+drop column `SOC 4 digit code`,
+drop column `SOC 4 digit label`;
+
+-- Creating foreign keys in fact table
+
+alter table soc4fact
+add constraint soc4regionfk
+foreign key (regionkey) references soc4regionaldim(regionkey)
+on update cascade
+on delete restrict;
+
+alter table soc4fact
+add constraint soc4industryfk
+foreign key (soc4_id) references soc4industrydim(soc4_id)
+on update cascade
+on delete restrict;
+
+alter table soc4fact
+add constraint soc4datefk
+foreign key (MonthYear) references datedim(MonthYear)
+on delete restrict
+on update cascade;
+
+-- Star Schema built and ready for further analysis 
+
+#####################################################################
+
